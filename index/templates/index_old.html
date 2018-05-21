@@ -1,0 +1,553 @@
+{% include 'header/header.html' %}
+{% load staticfiles %}
+
+{#<form id="upload-form" method="post" enctype="multipart/form-data">#}
+{#     {% csrf_token %}#}
+{#　　　<input class="font-color" type="file" id="upload" name="upload" /> <br />#}
+{#　　　<button id="upload-btn" type="button" onclick="test()">upload</button>#}
+{#</form>#}
+
+<div class="home">
+    <div class="div-inline left" style="margin-left: 10px;">
+{#        TODO#}
+{#        步骤信息#}
+        <h1 class="font-color" style="margin-top: 0px;">
+            肺结节检测
+        </h1>
+
+
+        <select id="mhd" onclick="selectMhd()" class="button button-rounded button-small" style="margin-bottom: 10px; width: 95.5%; font-size: medium;">
+            <option value ="1.3.6.1.4.1.14519.5.2.1.6279.6001.100225287222365663678666836860.mhd">example.0-6860</option>
+            <option value ="1.3.6.1.4.1.14519.5.2.1.6279.6001.100621383016233746780170740405.mhd">example.1-0405</option>
+            <option value ="1.3.6.1.4.1.14519.5.2.1.6279.6001.102133688497886810253331438797.mhd">example.2-8797</option>
+        </select>
+
+        <br>
+
+        <button onclick="loaddata()" class="button button-rounded button-small" style="font-size: medium;"> load data</button>
+        <button onclick="refreshImg()" class="button button-rounded button-small" style="font-size: medium;"> refresh </button>
+
+        <h2 style="margin-top: 10px; ">步骤向导</h2>
+
+        <ul style="padding-left: 0px; ">
+            <li>步骤一：步骤待确定步骤待确定</li>
+            <hr style="border: 0; border-top:2px dashed gray;"/>
+            <li>步骤二：步骤待确定步骤待确定</li>
+            <hr style="border: 0; border-top:2px dashed gray;"/>
+            <li>步骤三：步骤待确定步骤待确定</li>
+            <hr style="border: 0; border-top:2px dashed gray;"/>
+        </ul>
+
+    <div style="height: 1px;"></div>
+
+    <h2>可疑结节</h2>
+        <table class="table" cellspacing="0" style=" text-align: left; width: 100%" >
+
+            <thead>
+                <tr>
+                    <th class="table-head">编号</th>
+                    <th class="table-head">z  </th>
+                    <th class="table-head">y  </th>
+                    <th class="table-head">x  </th>
+                </tr>
+            </thead>
+
+        </table>
+
+        <div style="overflow: auto; height: 300px;">
+
+        <table class="table" cellspacing="0" cellpadding="0"  style="text-align: left; width: 100%; border-spacing:0px 3px;">
+
+            <thead>
+                <tr>
+                    <th class="table-head"></th>
+                    <th class="table-head"></th>
+                    <th class="table-head"></th>
+                    <th class="table-head"></th>
+                </tr>
+            </thead>
+
+            <tbody id="tb">
+
+                {% for foo in nodules %}
+
+                <tr class="default-cursor" onclick="getNodulesImage(this)" onmouseover="changeColor(this)" onmouseleave="resetColor(this)">
+                    <td>{{ foo.id }}</td>
+                    <td>{{ foo.z }} </td>
+                    <td>{{ foo.y }} </td>
+                    <td>{{ foo.x }} </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+
+        </table>
+        </div>
+    </div>
+
+    <div class="div-inline middle">
+{#        TODO#}
+{#        路径#}
+        <div class="img-block">
+            <div style="text-align: center">
+{#                TODO 加键盘上下监听#}
+                <img id="ct-img" class="img" onmousemove="getCoordinates()" src="" alt="" onmouseleave="hideCoordinates()">
+            </div>
+
+            <span class="img-info-top" id="slice">se: 0</span>
+            <span class="img-info-bot-x" id="mouse-x"></span>
+            <span class="img-info-bot-y" id="mouse-y"></span>
+        </div>
+        <div>
+{#            <input id="se-input" type="number" onchange="changeImg(this.value)" style="margin-top: 20px;">#}
+        </div>
+    </div>
+
+    <div class="div-inline right">
+{#        <div id="right_top" align="top">#}
+{#            <h1 style="margin-top: 0px;">肺部筛查报告</h1>#}
+{#        </div>#}
+{#        <div id="right_middle">#}
+{#            病人基本信息#}
+{#        </div>#}
+{#        <div id="right_bottom">#}
+{#            观察结果#}
+{#        </div>#}
+        <div class="img-small-block-field">
+        <div class="img-block-small">
+            <div style="text-align: center">
+                <img id="ct-img-x" class="img-small" src="" alt="" onmousemove="getCoordinatesX()" src="" alt="" onmouseleave="hideCoordinatesX()">
+            </div>
+
+            <span class="img-info-top" id="slice-x">se: 0</span>
+            <span class="img-info-bot-x" id="mouse-x-x"></span>
+            <span class="img-info-bot-y" id="mouse-x-y"></span>
+        </div>
+        </div>
+{#        <hr style="border: 0; border-top:2px dashed gray; margin-top: 50%; margin-bottom: 50%"/>#}
+
+        <div class="img-small-block-field">
+        <div class="img-block-small">
+            <div style="text-align: center">
+                <img id="ct-img-y" class="img-small" src="" alt="" onmousemove="getCoordinatesY()" src="" alt="" onmouseleave="hideCoordinatesY()">
+            </div>
+
+
+            <span class="img-info-top" id="slice-y">se: 0</span>
+            <span class="img-info-bot-x" id="mouse-y-x"></span>
+            <span class="img-info-bot-y" id="mouse-y-y"></span>
+        </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script language="JavaScript" type="text/javascript">
+    function test() {
+        $.ajax({
+            url: '/upload/',
+            type: 'POST',
+            cache: false,
+            data: new FormData($('#upload-form')[0]),
+            processData: false,
+            contentType: false,
+            success: function(){
+                alert("Data Upload Suc!");
+            }
+        })
+                .done(function(res) {
+        })
+                .fail(function(res) {});
+    }
+
+</script>
+
+
+{#滚轮监听#}
+<script language="JavaScript" type="text/javascript">
+    var mouseWheel = document.getElementById('ct-img');
+    var num = 0;
+    var num_x = 0;
+    var num_y = 0;
+    var numMax = 100;
+
+    if (mouseWheel.addEventListener) {
+
+        mouseWheel.addEventListener('DOMMouseScroll', function(event) {
+            event.target.innerHTML = event.detail;
+            event.stopPropagation();
+            event.preventDefault();
+
+        }, false);
+    }
+    mouseWheel.onmousewheel = function(event) {
+
+        event = event || window.event;
+        mouseWheel.innerHTML = event.wheelDelta.toString();
+        event.returnValue = false;
+
+
+        // 滚轮，滑动
+        if(event.wheelDelta > 0) {
+            changeImg(num + 1);
+        }else if(event.wheelDelta < 0) {
+            changeImg(num - 1);
+        }
+    }
+</script>
+<script language="JavaScript" type="text/javascript">
+    var mouseWheelx = document.getElementById('ct-img-x');
+
+    if (mouseWheelx.addEventListener) {
+
+        mouseWheelx.addEventListener('DOMMouseScroll', function(event) {
+            event.target.innerHTML = event.detail;
+            event.stopPropagation();
+            event.preventDefault();
+
+        }, false);
+    }
+    mouseWheelx.onmousewheel = function(event) {
+
+        event = event || window.event;
+        mouseWheelx.innerHTML = event.wheelDelta.toString();
+        event.returnValue = false;
+
+
+        // 滚轮，滑动
+        if(event.wheelDelta > 0) {
+            changeImgX(num_x + 1);
+        }else if(event.wheelDelta < 0) {
+            changeImgX(num_x - 1);
+        }
+    }
+</script>
+<script language="JavaScript" type="text/javascript">
+    var mouseWheely = document.getElementById('ct-img-y');
+
+    if (mouseWheely.addEventListener) {
+
+        mouseWheely.addEventListener('DOMMouseScroll', function(event) {
+            event.target.innerHTML = event.detail;
+            event.stopPropagation();
+            event.preventDefault();
+
+        }, false);
+    }
+    mouseWheely.onmousewheel = function(event) {
+
+        event = event || window.event;
+        mouseWheel.innerHTML = event.wheelDelta.toString();
+        event.returnValue = false;
+
+
+        // 滚轮，滑动
+        if(event.wheelDelta > 0) {
+            changeImgY(num_y + 1);
+        }else if(event.wheelDelta < 0) {
+            changeImgY(num_y - 1);
+        }
+    }
+</script>
+
+<script>
+    window.onload = init;
+
+    function init() {
+        document.getElementById("scroll").style.overflow = "hidden";
+        loaddata();
+        document.onkeydown = function(event){
+            var e = event
+            if(e && e.keyCode == 37){
+                changeImg(num - 1);
+
+            }
+            if(e && e.keyCode == 39){
+                changeImg(num + 1);
+            }
+            if(e && e.keyCode == 38){
+                changeImg(num - 1);
+
+            }
+            if(e && e.keyCode == 40){
+                changeImg(num + 1);
+            }
+        }
+    }
+
+    function getCoordinates() {
+        var xinfo = document.getElementById('mouse-x');
+        var yinfo = document.getElementById('mouse-y');
+
+        var x = event.clientX - document.getElementById('ct-img').getBoundingClientRect().left;
+        var y = event.clientY - document.getElementById('ct-img').getBoundingClientRect().top;
+
+        xinfo.innerHTML = "x: " + Math.ceil(x);
+        yinfo.innerHTML = "y: " + Math.ceil(y);
+    }
+
+    function getCoordinatesX() {
+        var xinfo = document.getElementById('mouse-x-x');
+        var yinfo = document.getElementById('mouse-x-y');
+
+        var x = event.clientX - document.getElementById('ct-img-x').getBoundingClientRect().left;
+        var y = event.clientY - document.getElementById('ct-img-x').getBoundingClientRect().top;
+
+        xinfo.innerHTML = "y: " + Math.ceil(x);
+        yinfo.innerHTML = "z: " + Math.ceil(y);
+    }
+
+    function getCoordinatesY() {
+        var xinfo = document.getElementById('mouse-y-x');
+        var yinfo = document.getElementById('mouse-y-y');
+
+        var x = event.clientX - document.getElementById('ct-img-y').getBoundingClientRect().left;
+        var y = event.clientY - document.getElementById('ct-img-y').getBoundingClientRect().top;
+
+        xinfo.innerHTML = "z: " + Math.ceil(x);
+        yinfo.innerHTML = "x: " + Math.ceil(y);
+    }
+
+    function changeImg(cnt){
+        var img = document.getElementById("ct-img");
+
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+
+                var jsontext = xmlhttp.response;
+                var path = JSON.parse(jsontext)['path'];
+
+                if(typeof(path) != "undefined") {
+                    path = "{% static "" %}" + path;
+                    img.src = path;
+                    document.getElementById('slice').innerHTML = "se: " + cnt;
+{#                    document.getElementById('se-input').value = cnt;#}
+                    num = parseInt(cnt);
+                }else {
+{#                    document.getElementById('se-input').value = num;#}
+                }
+            }
+        };
+        // TODO
+        // 请求图片路径
+        xmlhttp.open("GET", "/ajax_dict?cnt=" + cnt + "&value=" + document.getElementById('mhd').value + "&ca=0", true);
+        xmlhttp.send();
+    }
+
+    function changeImgX(cnt){
+        var img = document.getElementById("ct-img-x");
+
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+
+                var jsontext = xmlhttp.response;
+                var path = JSON.parse(jsontext)['path'];
+
+                if(typeof(path) != "undefined") {
+                    path = "{% static "" %}" + path;
+                    img.src = path;
+                    document.getElementById('slice-x').innerHTML = "se: " + cnt;
+                    num_x = parseInt(cnt);
+                }else {
+                }
+            }
+        };
+        // TODO
+        // 请求图片路径
+        xmlhttp.open("GET", "/ajax_dict?cnt=" + cnt + "&value=" + document.getElementById('mhd').value + "&ca=1", true);
+        xmlhttp.send();
+    }
+    function changeImgY(cnt){
+        var img = document.getElementById("ct-img-y");
+
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+
+                var jsontext = xmlhttp.response;
+                var path = JSON.parse(jsontext)['path'];
+
+                if(typeof(path) != "undefined") {
+                    path = "{% static "" %}" + path;
+                    img.src = path;
+                    document.getElementById('slice-y').innerHTML = "se: " + cnt;
+                    num_y = parseInt(cnt);
+                }else {
+                }
+            }
+        };
+        // TODO
+        // 请求图片路径
+        xmlhttp.open("GET", "/ajax_dict?cnt=" + cnt + "&value=" + document.getElementById('mhd').value + "&ca=2", true);
+        xmlhttp.send();
+    }
+
+    function getNodulesImage(obj) {
+        var cntZ = obj.cells[1].innerHTML; //结节图片编号
+        var cntX = obj.cells[2].innerHTML; //结节图片编号
+        var cntY = obj.cells[3].innerHTML; //结节图片编号
+
+        changeImg(cntZ);
+        changeImgX(cntX);
+        changeImgY(cntY);
+    }
+
+    function changeColor(obj) {
+{#        obj.style.color = "gray";#}
+        obj.style.backgroundColor = "gray";
+
+    }
+
+    function resetColor(obj) {
+{#        obj.style.color = "white";#}
+        obj.style.backgroundColor = "black";
+    }
+
+    function loaddata() {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+            }
+        };
+
+        // 请求生成图片
+        // 这里把mhd文件名传进去，加载指定的mhd文件
+        xmlhttp.open("GET", "/load_img?src=" + document.getElementById('mhd').value, true);
+        xmlhttp.send();
+
+        document.getElementById('ct-img').src = "";
+        changeImg(0);
+        changeImgX(0);
+        changeImgY(0);
+
+        // TODO
+        // 请求生成结节信息
+        loadnodules();
+    }
+
+    function loadnodules() {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function() {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+                document.getElementById('tb').innerHTML = "";
+                var jsontext = xmlhttp.response;
+                var nodules = JSON.parse(jsontext)['nodules'];
+                for(var i = 0; i < nodules.length; i++) {
+                    addNodulesList(i+1, nodules[i]['x'], nodules[i]['y'], nodules[i]['z']);
+                }
+            }
+        };
+        // TODO
+        // 请求图片路径
+        xmlhttp.open("GET", "/load_nodules?src=" + document.getElementById('mhd').value, true);
+        xmlhttp.send();
+    }
+
+    function addNodulesList(nid, x, y, z) {
+        var item = document.createElement('tr');
+
+        var id = document.createElement('td');
+        id.innerHTML = nid;
+
+        var cox = document.createElement('td');
+        cox.innerHTML = x;
+
+        var coy = document.createElement('td');
+        coy.innerHTML = y;
+
+        var coz = document.createElement('td');
+        coz.innerHTML = z;
+
+        item.appendChild(id);
+        item.appendChild(coz);
+        item.appendChild(cox);
+        item.appendChild(coy);
+
+        item.className = 'default-cursor';
+        item.setAttribute('onclick', 'getNodulesImage(this)');
+        item.setAttribute('onmouseover', 'changeColor(this)');
+        item.setAttribute('onmouseleave', 'resetColor(this)');
+
+        document.getElementById('tb').appendChild(item);
+    }
+
+    function selectMhd() {
+{#        alert(document.getElementById('mhd').value);#}
+    }
+
+    function loadMhd() {
+        alert("fuck u");
+    }
+
+    function hideCoordinates() {
+        var xinfo = document.getElementById('mouse-x');
+        var yinfo = document.getElementById('mouse-y');
+        xinfo.innerHTML = "";
+        yinfo.innerHTML = "";
+    }
+
+    function hideCoordinatesX() {
+        var xinfo = document.getElementById('mouse-x-x');
+        var yinfo = document.getElementById('mouse-x-y');
+        xinfo.innerHTML = "";
+        yinfo.innerHTML = "";
+    }
+
+    function hideCoordinatesY() {
+        var xinfo = document.getElementById('mouse-y-x');
+        var yinfo = document.getElementById('mouse-y-y');
+        xinfo.innerHTML = "";
+        yinfo.innerHTML = "";
+    }
+
+    function refreshImg() {
+        changeImg(0);
+        changeImgX(0);
+        changeImgY(0);
+    }
+</script>
+
+{% include 'footer/footer.html' %}
